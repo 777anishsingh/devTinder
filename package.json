@@ -1,0 +1,21 @@
+{
+  "name": "devtinder",
+  "version": "1.0.0",
+  "description": "Platform where developers can connect and explore",
+  "keywords": [
+    "node.js",
+    "javascript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Anish Sigh Butola",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
