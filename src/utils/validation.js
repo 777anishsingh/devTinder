@@ -1,7 +1,7 @@
 const validator = require('validator')
 
 function signUpValidator(req) {
-    const { firstName, lastName, emailId, password, age, photoUrl, gender } = req.body
+    const { firstName, lastName, emailId, password, age} = req.body
 
     if (!firstName || !lastName) {
         throw new Error("Enter a valid Name ")

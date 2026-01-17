@@ -8,23 +8,16 @@ const signUpValidator = require('./utils/validation')
 const bcrypt = require('bcrypt')
 const cookieParser = require('cookie-parser')
 const jwt = require('jsonwebtoken');
+const { userAuth } = require('./middleware/Auth')
 app.use(express.json())
 app.use(cookieParser())
 
 
 //GET /profile
-app.get('/profile', async (req, res) => {
+app.get('/profile', userAuth, async (req, res) => {
 
     try {
-        const token = req.cookies.token
-
-        if (!token) {
-            throw new Error("Invalid token")
-        }
-
-        const decodedUser = jwt.verify(token, process.env.SECRET_KEY)
-        const loggedInUser = await User.findOne({ _id: decodedUser })
-
+        const loggedInUser = req.user
         if (!loggedInUser) {
             throw new Error("User does not exist")
         }
@@ -34,8 +27,6 @@ app.get('/profile', async (req, res) => {
     }
 
 })
-
-
 
 //POST /login
 app.post('/login', async (req, res) => {
@@ -50,12 +41,11 @@ app.post('/login', async (req, res) => {
         if (!user) {
             throw new Error("Invalid Login details")
         }
-        const passwordAuth = await bcrypt.compare(password, user.password)
+        const passwordAuth = await user.validatePassword(password)
         if (passwordAuth) {
 
-            const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY)
-
-            res.cookie("token", token)
+            const token = await user.getJWT()
+            res.cookie("token", token, { expires: new Date(Date.now() + 7 * 24 * 3600000) }) //7 days expiry
 
             res.send("Login successful")
 
@@ -65,81 +55,6 @@ app.post('/login', async (req, res) => {
 
     } catch (err) {
         res.status(400).send('ERROR: ' + err.message);
-    }
-})
-
-//PATCH /user
-app.patch('/user/:userId', async (req, res) => {
-    const userId = req.params?.userId
-    const data = req.body
-
-
-    try {
-        const UPDATE_INTERFACE = ["photoUrl", "about", "skills", "age"]
-        const isValidUpdate = Object.keys(data).every((k) =>
-            UPDATE_INTERFACE.includes(k)
-        )
-
-        if (!isValidUpdate) {
-            throw new Error("Update not allowed")
-        }
-
-        if (data.skills && data?.skills.length > 10) {
-            throw new Error("Only 10 skills are allowed to enter")
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(userId, data, { returnDocument: 'after', runValidators: true })
-        console.log(updatedUser);
-        res.send("User Data Updated Successfully")
-
-    }
-    catch (err) {
-        res.status(400).send('Update failed: ' + err);
-    }
-})
-
-//DELETE /user
-app.delete('/user', async (req, res) => {
-    const userId = req.body.userId
-    try {
-        const user = await User.findByIdAndDelete(userId)
-        if (!user) {
-            res.status(404).send('User not found');
-        } else {
-
-            res.send("User deleted successfully")
-        }
-    }
-    catch (err) {
-        res.status(400).send('Something went wrong');
-    }
-})
-
-// GET /user
-app.get('/user', async (req, res) => {
-
-    const email = req.body.emailId;
-    try {
-        const user = await User.findOne({ emailId: email })
-        if (!user) {
-            res.status(404).send('User not found');
-        } else {
-            res.send(user)
-        }
-    }
-    catch (err) {
-        res.status(400).send('Something went wrong');
-    }
-})
-
-// GET /feed
-app.get('/feed', async (req, res) => {
-    try {
-        const users = await User.find({})
-        res.send(users)
-    }
-    catch (err) {
-        res.status(400).send('Something went wrong');
     }
 })
 
