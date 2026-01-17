@@ -19,27 +19,20 @@ const userSchema = new Schema(
         emailId: {
             type: String,
             required: true,
+            unique: true,
             lowercase: true,
             trim: true,
-            validate(value) {
-                if (!validator.isEmail(value)) {
-                    throw new Error("Enter a Email address: " + value)
-                }
-            }
-
 
         },
         age: {
             type: Number,
-            required: true,
             min: 18,
-            max: 57
+            max: 60
 
 
         },
         gender: {
             type: String,
-            required: true,
             lowercase: true,
             validate(value) {
                 if (!["male", "female", "others"].includes(value)) {
@@ -52,11 +45,6 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: true,
-            validate(value) {
-                if (!validator.isStrongPassword(value)) {
-                    throw new Error("Enter a strong password")
-                }
-            }
 
 
         },

@@ -2,13 +2,38 @@ require('dotenv').config()
 const connectDB = require("./config/database")
 const express = require('express')
 const app = express()
+const validator = require('validator')
 const User = require('./model/user')
+const signUpValidator = require('./utils/validation')
+const bcrypt = require('bcrypt')
 app.use(express.json())
 
+//POST /login
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body
+        if (!validator.isEmail(email)) {
+            throw new Error("Enter a valid Email Id")
+        }
 
+        const user = await User.findOne({ emailId: email })
+
+        if (!user) {
+            throw new Error("Invalid Login details")
+        }
+        const passwordAuth = await bcrypt.compare(password, user.password)
+        if (passwordAuth) {
+            res.send("Login successful")
+        } else {
+            throw new Error("Invalid Login details")
+        }
+
+    } catch (err) {
+        res.status(400).send('ERROR: ' + err.message);
+    }
+})
 
 //PATCH /user
-
 app.patch('/user/:userId', async (req, res) => {
     const userId = req.params?.userId
     const data = req.body
@@ -85,9 +110,35 @@ app.get('/feed', async (req, res) => {
 
 // POST /signup
 app.post('/signup', async (req, res) => {
-    const user = new User(req.body);
-
     try {
+        //validator
+        signUpValidator(req)
+        const {
+            firstName,
+            lastName,
+            emailId,
+            password,
+            age,
+            skills,
+            about,
+            gender,
+            photoUrl,
+        } = req.body;
+
+        //password hash
+        const passwordHash = await bcrypt.hash(password, 10)
+
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password: passwordHash,
+            age,
+            skills,
+            about,
+            gender,
+            photoUrl
+        });
         if (user?.skills.length > 10) {
             throw new Error("Only 10 skills are allowed to enter")
         }
@@ -96,7 +147,7 @@ app.post('/signup', async (req, res) => {
         res.send('User Created Successfully')
 
     } catch (err) {
-        res.status(400).send('Error saving user details' + err);
+        res.status(400).send('ERROR: ' + err.message);
     }
 })
 
