@@ -1,15 +1,3 @@
-const adminAuth = (req, res, next) => {
-    console.log("Admin Auth fn");
-
-    const token = 'anish'
-    const authenticator = (token) === 'anish'
-    if (!authenticator) {
-        res.status(401).send("Admin Unauthorized");
-    } else {
-        next();
-    }
-}
-
 const userAuth = (req, res, next) => {
     console.log("User Auth fn");
 
@@ -22,4 +10,4 @@ const userAuth = (req, res, next) => {
     }
 }
 
-module.exports = { adminAuth, userAuth }
+module.exports = { userAuth }

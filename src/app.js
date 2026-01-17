@@ -6,7 +6,36 @@ const validator = require('validator')
 const User = require('./model/user')
 const signUpValidator = require('./utils/validation')
 const bcrypt = require('bcrypt')
+const cookieParser = require('cookie-parser')
+const jwt = require('jsonwebtoken');
 app.use(express.json())
+app.use(cookieParser())
+
+
+//GET /profile
+app.get('/profile', async (req, res) => {
+
+    try {
+        const token = req.cookies.token
+
+        if (!token) {
+            throw new Error("Invalid token")
+        }
+
+        const decodedUser = jwt.verify(token, process.env.SECRET_KEY)
+        const loggedInUser = await User.findOne({ _id: decodedUser })
+
+        if (!loggedInUser) {
+            throw new Error("User does not exist")
+        }
+        res.send(loggedInUser)
+    } catch (err) {
+        res.status(400).send('ERROR: ' + err.message);
+    }
+
+})
+
+
 
 //POST /login
 app.post('/login', async (req, res) => {
@@ -23,7 +52,13 @@ app.post('/login', async (req, res) => {
         }
         const passwordAuth = await bcrypt.compare(password, user.password)
         if (passwordAuth) {
+
+            const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY)
+
+            res.cookie("token", token)
+
             res.send("Login successful")
+
         } else {
             throw new Error("Invalid Login details")
         }
