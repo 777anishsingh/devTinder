@@ -10,13 +10,12 @@ const userSchema = new Schema(
             type: String,
             required: true,
             minLength: 3,
-            maxLength: 30
+            maxLength: 30,
         },
         lastName: {
             type: String,
             minLength: 3,
             maxLength: 30
-
         },
         emailId: {
             type: String,
@@ -24,14 +23,16 @@ const userSchema = new Schema(
             unique: true,
             lowercase: true,
             trim: true,
-
         },
         age: {
             type: Number,
-            min: 18,
-            max: 60
-
-
+            validate(value) {
+                if (value < 18) {
+                    throw new Error("Age is less than 18")
+                } else if (value >= 60) {
+                    throw new Error("Age is greater than 60")
+                }
+            }
         },
         gender: {
             type: String,
@@ -41,8 +42,6 @@ const userSchema = new Schema(
                     throw new Error("Gender not valid")
                 }
             }
-
-
         },
         password: {
             type: String,
@@ -58,18 +57,23 @@ const userSchema = new Schema(
                     throw new Error("Enter a valid photo Url " + value)
                 }
             }
-
         },
         about: {
             type: String,
             default: "This is you about section, Please write about yourself",
-            maxLength: 200
-
-
+            validate(value) {
+                if (value.length > 200) {
+                    throw new Error("About should be less than 200 characters")
+                }
+            }
         },
         skills: {
             type: [String],
-
+            validate(value) {
+                if (value.length > 10) {
+                    throw new Error("Only 10 skills are allowed to enter")
+                }
+            }
         }
     },
     {

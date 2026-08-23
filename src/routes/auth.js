@@ -1,9 +1,17 @@
 const express = require('express')
 const authRouter = express.Router()
 const validator = require('validator')
-const User = require('../model/user')
-const signUpValidator = require('../utils/validation')
-const bcrypt = require('bcrypt')
+const User = require('../model/userModel')
+const {signUpValidator} = require('../utils/validation')
+const passwordHash = require('../utils/passwordHasher')
+
+// POST /logout
+authRouter.post('/logout', (req, res) => {
+    res.cookie('token', null, {
+        expires: new Date(Date.now())
+    })
+    res.send("User logout successful")
+})
 
 //POST /login
 authRouter.post('/login', async (req, res) => {
@@ -53,22 +61,19 @@ authRouter.post('/signup', async (req, res) => {
         } = req.body;
 
         //password hash
-        const passwordHash = await bcrypt.hash(password, 10)
+        const hashedPassword = await passwordHash(password)
 
         const user = new User({
             firstName,
             lastName,
             emailId,
-            password: passwordHash,
+            password: hashedPassword,
             age,
             skills,
             about,
             gender,
             photoUrl
         });
-        if (user?.skills.length > 10) {
-            throw new Error("Only 10 skills are allowed to enter")
-        }
 
         await user.save();
         res.send('User Created Successfully')
