@@ -17,6 +17,7 @@ function editProfileValidation(req) {
         'firstName',
         'lastName',
         'age',
+        "gender",
         'skills',
         'about',
         'photoUrl',]

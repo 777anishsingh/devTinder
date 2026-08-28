@@ -9,7 +9,7 @@ const requestRouter = express.Router();
 requestRouter.post('/request/review/:status/:fromUserId', userAuth, async (req, res) => {
     try {
         const { status, fromUserId } = req.params;
-        const toUserId = req.user;
+        const toUserId = req.user._id;
         const fromUser = await User.findById(fromUserId);
 
         const connectionRequest = await reviewConnectionReqValidation(fromUserId, toUserId, status);

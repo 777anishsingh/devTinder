@@ -2,7 +2,7 @@ const express = require('express')
 const authRouter = express.Router()
 const validator = require('validator')
 const User = require('../model/userModel')
-const {signUpValidator} = require('../utils/validation')
+const { signUpValidator } = require('../utils/validation')
 const passwordHash = require('../utils/passwordHasher')
 
 // POST /logout
@@ -16,15 +16,15 @@ authRouter.post('/logout', (req, res) => {
 //POST /login
 authRouter.post('/login', async (req, res) => {
     try {
-        const { email, password } = req.body
-        if (!validator.isEmail(email)) {
+        const { emailId, password } = req.body
+        if (!validator.isEmail(emailId)) {
             throw new Error("Enter a valid Email Id")
         }
 
-        const user = await User.findOne({ emailId: email })
+        const user = await User.findOne({ emailId: emailId })
 
         if (!user) {
-            throw new Error("Invalid Login details")
+            throw new Error("Email or password does not exist, Please try again.")
         }
         const isPasswordValid = await user.validatePassword(password)
         if (isPasswordValid) {
@@ -32,14 +32,17 @@ authRouter.post('/login', async (req, res) => {
             const token = await user.getJWT()
             res.cookie("token", token, { expires: new Date(Date.now() + 7 * 24 * 3600000) }) //7 days expiry
 
-            res.send("Login successful")
+            res.json({
+                message: "Login successful",
+                user,
+            });
 
         } else {
-            throw new Error("Invalid Login details")
+            throw new Error("Email or password does not exist, Please try again.")
         }
 
     } catch (err) {
-        res.status(400).send('ERROR: ' + err.message);
+        res.status(400).send(err.message);
     }
 })
 
@@ -75,8 +78,16 @@ authRouter.post('/signup', async (req, res) => {
             photoUrl
         });
 
-        await user.save();
-        res.send('User Created Successfully')
+        const signedUpUser = await user.save();
+
+
+        const token = await user.getJWT()
+        res.cookie("token", token, { expires: new Date(Date.now() + 7 * 24 * 3600000) }) //7 days expiry
+
+        res.json({
+            message: "New user registered successfully",
+            user: signedUpUser,
+        })
 
     } catch (err) {
         res.status(400).send('ERROR: ' + err.message);

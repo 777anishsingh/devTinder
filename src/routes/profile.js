@@ -25,27 +25,25 @@ profileRouter.patch(('/profile/password'), userAuth, async (req, res) => {
 })
 
 //POST /profile/edit
-profileRouter.post('/profile/edit', userAuth, async (req, res) => {
+profileRouter.patch('/profile/edit', userAuth, async (req, res) => {
 
     try {
         if (!editProfileValidation(req)) {
             throw new Error("Edit not allowed")
         }
-        const loggedInUser = req.user 
+        const loggedInUser = req.user
         Object.keys(req.body).forEach(k =>
             loggedInUser[k] = req.body[k]
         )
-        console.log(loggedInUser);
+        // console.log(loggedInUser);
         await loggedInUser.save()
 
-        res.send({ message: `${loggedInUser.firstName}, Your Edit was Successful`, Data: loggedInUser })
+        res.send({ message: `${loggedInUser.firstName}, Your Edit was Successful`, loggedInUser })
 
 
     } catch (err) {
-        res.status(400).send('ERROR: ' + err.message);
+        res.status(400).send(err.message);
     }
-
-
 })
 
 //GET /profile/view
@@ -56,7 +54,19 @@ profileRouter.get('/profile/view', userAuth, async (req, res) => {
         if (!loggedInUser) {
             throw new Error("User does not exist")
         }
-        res.send(loggedInUser)
+        const safeUser = {
+            firstName: loggedInUser.firstName,
+            lastName: loggedInUser.lastName,
+            age: loggedInUser.age,
+            gender: loggedInUser.gender,
+            skills: loggedInUser.skills,
+            about: loggedInUser.about,
+            photoUrl: loggedInUser.photoUrl,
+        };
+        res.json({
+            message: "User Fetched Successfully",
+            safeUser,
+        })
     } catch (err) {
         res.status(400).send('ERROR: ' + err.message);
     }

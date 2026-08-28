@@ -15,7 +15,8 @@ const userSchema = new Schema(
         lastName: {
             type: String,
             minLength: 3,
-            maxLength: 30
+            maxLength: 30,
+            required: true,
         },
         emailId: {
             type: String,
@@ -29,8 +30,8 @@ const userSchema = new Schema(
             validate(value) {
                 if (value < 18) {
                     throw new Error("Age is less than 18")
-                } else if (value >= 60) {
-                    throw new Error("Age is greater than 60")
+                } else if (value >= 100) {
+                    throw new Error("Age is greater than 100")
                 }
             }
         },
@@ -62,8 +63,8 @@ const userSchema = new Schema(
             type: String,
             default: "This is you about section, Please write about yourself",
             validate(value) {
-                if (value.length > 200) {
-                    throw new Error("About should be less than 200 characters")
+                if (value.length > 500) {
+                    throw new Error("About should be less than 500 characters")
                 }
             }
         },
