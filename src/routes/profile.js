@@ -54,18 +54,9 @@ profileRouter.get('/profile/view', userAuth, async (req, res) => {
         if (!loggedInUser) {
             throw new Error("User does not exist")
         }
-        const safeUser = {
-            firstName: loggedInUser.firstName,
-            lastName: loggedInUser.lastName,
-            age: loggedInUser.age,
-            gender: loggedInUser.gender,
-            skills: loggedInUser.skills,
-            about: loggedInUser.about,
-            photoUrl: loggedInUser.photoUrl,
-        };
         res.json({
             message: "User Fetched Successfully",
-            safeUser,
+            loggedInUser,
         })
     } catch (err) {
         res.status(400).send('ERROR: ' + err.message);

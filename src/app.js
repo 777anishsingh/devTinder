@@ -8,10 +8,16 @@ const profileRouter = require('./routes/profile')
 const cookieParser = require('cookie-parser')
 const requestRouter = require('./routes/requests')
 const userRouter = require('./routes/user')
-const cors = require('cors')
+const cors = require('cors');
+const PORT = 3000;
+
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+];
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
 }))
 app.use(express.json())
@@ -27,8 +33,8 @@ app.use("/imagekit", imageKitRouter);
 
 connectDB().then(() => {
     console.log('DB connection successful');
-    app.listen(3000, () => {
-        console.log("Server successfully listening on port 3000");
+    app.listen(PORT || 3000, () => {
+        console.log(`Server successfully listening on port ${PORT || 3000}`);
     })
 }).catch(err => {
     console.error("DB connection not successful: ", err)
