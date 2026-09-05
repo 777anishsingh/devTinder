@@ -24,3 +24,6 @@
 - Interested
 - Accept
 - Reject
+
+## Payment Integration APIs
+- POST /payment/create

@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser')
 const requestRouter = require('./routes/requests')
 const userRouter = require('./routes/user')
 const cors = require('cors');
+const paymentRouter = require('./routes/payment');
 const PORT = 3000;
 
 const allowedOrigins = [
@@ -35,6 +36,7 @@ app.use('/', authRouter);
 app.use('/', profileRouter)
 app.use('/', requestRouter)
 app.use('/', userRouter)
+app.use('/', paymentRouter)
 app.use("/imagekit", imageKitRouter);
 
 connectDB().then(() => {
