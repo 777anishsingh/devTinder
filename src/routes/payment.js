@@ -17,7 +17,7 @@ paymentRouter.post('/payment/create', userAuth, async (req, res) => {
         const order = await razorpayInstance.orders.create({
             "amount": membershipAmount[membershipType] * 100,
             "currency": "INR",
-            "receipt": "receipt#1",
+            "receipt": `receipt_${Date.now()}`,
             "notes": {
                 firstName,
                 lastName,
@@ -26,7 +26,7 @@ paymentRouter.post('/payment/create', userAuth, async (req, res) => {
             }
         })
 
-        const payment = new paymentSchema({
+        const payment = new Payment({
             userId: req.user._id,
             orderId: order.id,
             status: order.status,
